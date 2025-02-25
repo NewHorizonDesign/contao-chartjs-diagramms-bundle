@@ -24,3 +24,7 @@ composer require Newhorizondesign/contao-chartjs-diagramms
 
 - PHP: `^8.0`
 - Contao: `^4.13 || ^5.0`
+
+### Currently not testet for 5.0 Contao
+
+Reviewed and updated by the end of March 2025c

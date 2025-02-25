@@ -10,7 +10,6 @@
   ],
   "type": "contao-bundle",
   "license": "GPL-3.0-or-later",
-  "version": "1.0.0",
   "minimum-stability": "stable",
   "prefer-stable": true,
   "authors": [

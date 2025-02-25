@@ -36,7 +36,7 @@ $GLOBALS['TL_DCA']['tl_nhd_chartjs_diagramms'] = [
             'fields'      => ['chartGroup','title'],
             'flag'        => 1,
             'panelLayout' => 'filter;sort,search,limit',
-            'group_callback' => ['tl_nhd_chartjs_diagramms', 'groupChartGroup']
+            'group_callback' => ['tl_nhd_chartjs_diagramms']
         ],
         'label'             => [
             'fields' => ['id','title'],
@@ -199,18 +199,8 @@ $GLOBALS['TL_DCA']['tl_nhd_chartjs_diagramms'] = [
     ]
 ];
 
-$GLOBALS['TL_DCA']['tl_nhd_chartjs_diagramms']['config']['onsubmit_callback'][] = ['tl_nhd_chartjs_diagramms', 'groupChartGroup'];
-
 class tl_nhd_chartjs_diagramms extends Backend
 {
-    public function groupChartGroup($group, $mode, $field, $row, DataContainer $dc)
-    {
-        var_dump($group); exit;
-        return '<div style="background:#f3f3f3; font-weight:bold; padding:5px; border-bottom:1px solid #ddd;">
-                    <span style="color:#4a90e2;">' . htmlspecialchars($group) . '</span>
-                </div>';
-    }
-
     public function jsonInputOptionsCallback($varValue, DataContainer $dc)
     {
         if(!empty($varValue)) {

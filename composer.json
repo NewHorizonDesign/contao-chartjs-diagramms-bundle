@@ -1,0 +1,64 @@
+{
+  "name": "newhorizondesign/contao-chartjs-diagramms-bundle",
+  "description": "Contao Bundle Diagramms based on Chart.js",
+  "keywords": [
+      "contao",
+      "bundle",
+      "chartjs",
+      "Newhorizondesign",
+      "bundle"
+  ],
+  "type": "contao-bundle",
+  "license": "GPL-3.0-or-later",
+  "version": "1.0.0",
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "authors": [
+      {
+          "name": "Newhorizondesign",
+          "email": "service@newhorizon-design.de",
+          "homepage": "https://github.com/Newhorizondesign",
+          "role": "Developer"
+      }
+  ],
+  "homepage": "https://www.newhorizon-design.de",
+  "support": {
+      "issues": "https://github.com/Newhorizondesign/contao-chartjs-diagramms-bundle/issues",
+      "source": "https://github.com/Newhorizondesign/contao-chartjs-diagramms-bundle"
+  },
+  "require": {
+      "php": "^7.4 || ^8.0",
+      "contao/core-bundle": "^4.13 || ^5.3"
+  },
+  "require-dev": {
+      "contao/manager-plugin": "^2.3.1",
+      "contao/test-case": "^4.5",
+      "phpunit/phpunit": "^9.6",
+      "symfony/http-client": "5.4.*",
+      "symfony/phpunit-bridge": "^5.4",
+      "contao/easy-coding-standard": "^5.0"
+  },
+  "autoload": {
+      "psr-4": {
+         "Newhorizondesign\\ContaoChartjsDiagrammsBundle\\": "src/"
+      }
+  },
+  "autoload-dev": {
+      "psr-4": {
+        "Newhorizondesign\\ContaoChartjsDiagrammsBundle\\": "tests/"
+      }
+  },
+  "extra": {
+      "contao-manager-plugin": "Newhorizondesign\\ContaoChartjsDiagrammsBundle\\ContaoManager\\Plugin"
+  },
+  "scripts": {
+      "all": [
+          "@unit-tests",
+          "@ecs",
+          "@phpstan"
+      ],
+      "ecs": "@php tools/ecs/vendor/bin/ecs check src tests --config ecs.php --fix --ansi",
+      "phpstan": "@php tools/phpstan/vendor/bin/phpstan analyze --ansi",
+      "unit-tests": "@php vendor/bin/phpunit --colors=always"
+  }
+}

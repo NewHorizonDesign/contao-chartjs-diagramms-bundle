@@ -1,0 +1,36 @@
+<!-- indexer::stop -->
+{% if title is defined %}<h3>{{title}}</h3>{% endif %}
+<section
+    class="diagramms{% if cssClass is defined %} {{cssClass}} {% endif %}"
+    style="
+        {% if responsiveWidth == false %}width: {{chartWidth ~ 'px'}};{% else %}width: 100%;{% endif %}
+        {% if (chartHeight is not empty) %} height: {{chartHeight ~ 'px'}}; {% endif %}
+        {% if title is defined %} padding-top: 25px; {% endif %}
+    "
+>
+    <canvas id="{% if cssID is defined %}{{cssID}}{% else %}{{chartID}}{% endif %}">
+</section>
+
+<script>
+    const ctx_{{chartID}} = document.getElementById('{{cssID}}');
+    const labels_{{chartID}} = {{chartLabel|raw}};
+    const data_{{chartID}} = {
+        labels: labels_{{chartID}}.map(label => wrapText(label, 50)),
+        datasets: [{
+                labels: labels_{{chartID}},
+                {{chartData|raw}}
+        }]
+    }
+    const options_{{chartID}} = {
+        {{chartOptions|raw}},
+        {% if responsiveWidth == true %}responsive: true,{% endif %}
+        {% if chartAnimation == true %}animation: false,{% endif %}
+        maintainAspectRatio: true,
+    }
+    const chart_{{chartID}} = new Chart(ctx_{{chartID}}, {
+        type: '{{chartType}}',
+        data: data_{{chartID}},
+        options: options_{{chartID}},
+    });
+</script>
+<!-- indexer::continue -->

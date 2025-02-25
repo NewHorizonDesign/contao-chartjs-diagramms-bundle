@@ -1,0 +1,3 @@
+newhorizondesign_contao_chartjs_diagramms.controller:
+  resource: ../Controller
+  type: annotation

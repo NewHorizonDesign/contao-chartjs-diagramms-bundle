@@ -37,13 +37,16 @@ $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['size'] = ["Diagrammgröße defi
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['addSubpalette'] = ["Erweiterte Einstellungen", "Hier können Sie die erweiterten Einstellungen aktivieren."];
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['cssID'] = ["CSS ID", "Hier können Sie eine ID eingeben."];
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['cssClass'] = ["CSS Klasse", "Hier können Sie beliebig viele Klassen eingeben."];
-// $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['singleSRC'] = ["JSON Datei", "Entweder laden Sie eine JSON Datei hoch, oder schreiben diese in das Textfeld"];
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['activeAnimation'] = ["Animationen deaktivieren?", "Falls zuviele Diagramme auf einer Seite existieren, sollte diese Option aktiviert werden!"];
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['responsiveWidth'] = ["Responsive Breite aktivieren?", "Soll der Chart auf die maximal mögliche Breite erstellt werden?"];
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['jsonInput'] = ["Datensatz für Diagramm", "Definiere hier den Datensatz. Mehr Informationen unter https://www.chartjs.org/docs/latest/charts/"];
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['jsonInputLabels'] = ["Labels für Diagramm", "Definiere hier die Labels (diese sollten gleiche Anzahl wie Datensatz haben). Mehr Informationen unter https://www.chartjs.org/docs/latest/charts/"];
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['jsonInputOptions'] = ["Optionen für Diagramm", "Definiere hier deine Optionen. Mehr Informationen unter https://www.chartjs.org/docs/latest/charts/"];
 
+/**
+ * Errors
+ */
+$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['error']['noModuleGiven'] = "Kein ChartJs Module definiert!";
 
 /**
  * Options

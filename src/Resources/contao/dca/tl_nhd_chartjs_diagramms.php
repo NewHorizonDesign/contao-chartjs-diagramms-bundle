@@ -98,7 +98,8 @@ $GLOBALS['TL_DCA']['tl_nhd_chartjs_diagramms'] = [
             'sql' => "int(10) unsigned NOT NULL default '0'"
         ],
         'title'          => [
-            'inputType' => 'text',
+            'inputType' => 'inputUnit',
+            'options' => ['h2', 'h3', 'h4', 'h5', 'h6'],
             'exclude'   => true,
             'search'    => true,
             'filter'    => true,

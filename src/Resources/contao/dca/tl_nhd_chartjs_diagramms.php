@@ -78,7 +78,7 @@ $GLOBALS['TL_DCA']['tl_nhd_chartjs_diagramms'] = [
     ],
     'palettes'    => [
         '__selector__' => ['addSubpalette'],
-        'default'      => '{first_legend},chartGroup,title,chartType,size,cssID,cssClass;{second_legend},activeAnimation,responsiveWidth,singleSRC,jsonInput,jsonInputLabels,jsonInputOptions;'
+        'default'      => '{first_legend},chartGroup,title,chartType,size,cssID,cssClass;{second_legend},activeAnimation,responsiveWidth,maintainAspectRatio,singleSRC,jsonInput,jsonInputLabels,jsonInputOptions;'
     ],
     'fields'      => [
         'chartGroup'   => [
@@ -151,7 +151,7 @@ $GLOBALS['TL_DCA']['tl_nhd_chartjs_diagramms'] = [
                 'type'  => 'boolean',
                 'default'  => false,
             ],
-            'eval'  => ['tl_class' => 'w50 m12'],
+            'eval'  => ['tl_class' => 'long'],
         ],
         'responsiveWidth' => [
             'inputType' => 'checkbox',
@@ -159,7 +159,15 @@ $GLOBALS['TL_DCA']['tl_nhd_chartjs_diagramms'] = [
                 'type' => 'boolean',
                 'default' => false,
             ],
-            'eval'  => ['tl_class' => 'w50 m12'],
+            'eval'  => ['tl_class' => 'long'],
+        ],
+        'maintainAspectRatio' => [
+            'inputType' => 'checkbox',
+            'sql' => [
+                'type' => 'boolean',
+                'default' => true,
+            ],
+            'eval'  => ['tl_class' => 'long'],
         ],
         'jsonInput'  => [
             'inputType' => 'textarea',

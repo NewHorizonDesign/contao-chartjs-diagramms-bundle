@@ -39,6 +39,7 @@ $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['cssID'] = ["CSS ID", "Hier kön
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['cssClass'] = ["CSS Klasse", "Hier können Sie beliebig viele Klassen eingeben."];
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['activeAnimation'] = ["Animationen deaktivieren?", "Falls zuviele Diagramme auf einer Seite existieren, sollte diese Option aktiviert werden!"];
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['responsiveWidth'] = ["Responsive Breite aktivieren?", "Soll der Chart auf die maximal mögliche Breite erstellt werden?"];
+$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['maintainAspectRatio'] = ["Beibehaltung des Seitenverhältnisses", "Soll das Verhältnis Breite gleich Höhe eingestellt werden?"];
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['jsonInput'] = ["Datensatz für Diagramm", "Definiere hier den Datensatz. Mehr Informationen unter https://www.chartjs.org/docs/latest/charts/"];
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['jsonInputLabels'] = ["Labels für Diagramm", "Definiere hier die Labels (diese sollten gleiche Anzahl wie Datensatz haben). Mehr Informationen unter https://www.chartjs.org/docs/latest/charts/"];
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['jsonInputOptions'] = ["Optionen für Diagramm", "Definiere hier deine Optionen. Mehr Informationen unter https://www.chartjs.org/docs/latest/charts/"];
@@ -78,40 +79,48 @@ plugins: {
 	legend: {
 		align: 'start',
 		position: 'bottom',
-		labels: {
-			anchor: 'center',
-			usePointStyle: true,
-			font: {
-				size: 10
-			},
-			generateLabels(chart) {
-				const labels = chart.data.labels;
+        labels: {
+            // if Display True is set, the legend is displayed in the canvas and deactivated outside of it on Template!
+			display: false 
+            anchor: 'center',
+            position: 'bottom',
+            usePointStyle: true,
+            font: {
+                size: 10
+            },
+            generateLabels(chart) {
+                const labels = chart.data.labels;
                 return labels.map(function(label, i) {
-                	const value = chart.data.datasets[0].data[i];
-                	const meta = chart.getDatasetMeta(0);
-                	const style = meta.controller.getStyle(i);
+                    const value = chart.data.datasets[0].data[i];
+                    const meta = chart.getDatasetMeta(0);
+                    const style = meta.controller.getStyle(i);
                     return {
-                    	text: value + '% ' + labels[i].join(' '),
-	                    fillStyle: style.backgroundColor,
-	                    strokeStyle: style.borderColor,
-	                    lineWidth: style.borderWidth,
-	                    hidden: !chart.getDataVisibility(i),
-	                    index: i
+                        text: labels[i],
+                        fillStyle: style.backgroundColor,
+                        strokeStyle: style.borderColor,
+                        lineWidth: style.borderWidth,
+                        hidden: !chart.getDataVisibility(i),
+                        index: i
                     }
                 });
                 return [];
-			}
-		},
+            }
+        }
 	},
 	tooltip: {
 		position: 'nearest',
 		yAlign: 'top',
 		xAlign: 'center',
+        titleFont: {
+			size: 10
+		},
+		bodyFont: {
+			size: 11 
+		},
 		callbacks: {
             label: function(context) {
                 let label = context.label || '';
                 let value = context.raw || '';
-                // Tooltip verwendet die umgebrochene Version des Labels
                 return value + '%';
             }
         }
@@ -136,7 +145,9 @@ backgroundColor: [
 	'#163263'
 ],
 borderWidth: 0,
-hoverOffset: 6
+hoverOffset: 6,
+borderWidth: 0,
+hoverBorderWidth: 0
 ");
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInput']['default']['area'] = json_encode("{
     {fill: 'origin'},      // 0: fill to 'origin'

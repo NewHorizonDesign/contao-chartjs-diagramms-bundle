@@ -15,6 +15,7 @@ final class IncludeCssJsListener
 {
     public function __invoke(): void
     {
+        $GLOBALS['TL_HEAD'][] = FrontendTemplate::generateStyleTag('bundles/newhorizondesigncontaochartjsdiagramms/css/style.css');
         $GLOBALS['TL_HEAD'][] = FrontendTemplate::generateScriptTag('bundles/newhorizondesigncontaochartjsdiagramms/js/chartjsfunctions.js');
         $GLOBALS['TL_HEAD'][] = FrontendTemplate::generateScriptTag('bundles/newhorizondesigncontaochartjsdiagramms/js/chart.js');
     }

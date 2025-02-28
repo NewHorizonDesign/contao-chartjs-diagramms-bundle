@@ -68,8 +68,9 @@ class ModDiagramElementController extends AbstractContentElementController
                 'chartData'         => StringUtil::decodeEntities(${'chartModel'.$chartNumber}->jsonInput),
                 'chartLabel'        => StringUtil::decodeEntities(${'chartModel'.$chartNumber}->jsonInputLabels),
                 'chartOptions'      => StringUtil::decodeEntities(${'chartModel'.$chartNumber}->jsonInputOptions),
-                'chartAnimation'    => (${'chartModel'.$chartNumber}->activeAnimation) ? true: false,
-                'responsiveWidth'   => (${'chartModel'.$chartNumber}->responsiveWidth) ? true: false,
+                'chartAnimation'    => ${'chartModel'.$chartNumber}->activeAnimation ?? false,
+                'responsiveWidth'   => ${'chartModel'.$chartNumber}->responsiveWidth ?? false,
+                'maintainAspectRatio' => ${'chartModel'.$chartNumber}->maintainAspectRatio ?? false
             ]
         ));
     }

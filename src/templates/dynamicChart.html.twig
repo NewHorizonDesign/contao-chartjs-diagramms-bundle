@@ -1,36 +1,73 @@
 <!-- indexer::stop -->
 {% if title is defined %}<{{titleUnit}}>{{title}}</{{titleUnit}}>{% endif %}
+
+{% set widthValue = responsiveWidth ? "100%" : chartWidth ~ 'px' %}
+{% set heightValue = chartHeight is not empty ? chartHeight ~ 'px' : 'auto' %}
+{% set diagrammWidth = "width: " ~ widthValue %}
+{% set diagrammHeight = "height: " ~ heightValue %}
+{% set paddingTop = title is defined ? "padding-top: 25px;" : "" %}
+{% set legendId = (cssID is defined ? cssID : chartID) ~ "-legend" %}
+
 <section
     class="diagramms{% if cssClass is defined %} {{cssClass}} {% endif %}"
-    style="
-        {% if responsiveWidth == false %}width: {{chartWidth ~ 'px'}};{% else %}width: 100%;{% endif %}
-        {% if (chartHeight is not empty) %} height: {{chartHeight ~ 'px'}}; {% endif %}
-        {% if title is defined %} padding-top: 25px; {% endif %}
-    "
+    style="{{ diagrammWidth }}; {{ diagrammHeight }}; {{ paddingTop }}"
 >
-    <canvas id="{% if cssID is defined %}{{cssID}}{% else %}{{chartID}}{% endif %}">
+    <canvas id="{% if cssID is defined %}{{cssID}}{% else %}{{chartID}}{% endif %}"></canvas>
 </section>
+<section id="{{legendId}}" class="chart-legend"></section>
 
 <script>
-    const ctx_{{chartID}} = document.getElementById('{{cssID}}');
-    const labels_{{chartID}} = {{chartLabel|raw}};
-    const data_{{chartID}} = {
-        labels: labels_{{chartID}}.map(label => wrapText(label, 50)),
-        datasets: [{
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx_{{chartID}} = document.getElementById('{{cssID}}');
+        const labels_{{chartID}} = {{chartLabel|raw}};
+        const data_{{chartID}} = {
+            labels: labels_{{chartID}},
+            datasets: [{
                 labels: labels_{{chartID}},
                 {{chartData|raw}}
-        }]
-    }
-    const options_{{chartID}} = {
-        {{chartOptions|raw}},
-        {% if responsiveWidth == true %}responsive: true,{% endif %}
-        {% if chartAnimation == true %}animation: false,{% endif %}
-        maintainAspectRatio: true,
-    }
-    const chart_{{chartID}} = new Chart(ctx_{{chartID}}, {
-        type: '{{chartType}}',
-        data: data_{{chartID}},
-        options: options_{{chartID}},
+            }]
+        };
+
+        const options_{{chartID}} = {
+            {{chartOptions|raw}},
+            responsive: {{responsiveWidth}},
+            animation: {{chartAnimation}},
+            maintainAspectRatio: {{maintainAspectRatio}},
+        };
+
+        const chart_{{chartID}} = new Chart(ctx_{{chartID}}, {
+            type: '{{chartType}}',
+            data: data_{{chartID}},
+            options: options_{{chartID}}
+        });
+
+        const legendContainer = document.getElementById("{{legendId}}");
+
+        if (legendContainer && !chart_{{chartID}}.options.plugins.legend.display) {
+            legendContainer.innerHTML = chart_{{chartID}}.data.labels.map((label, index) => {
+            return `
+                <div class="legend-item" data-index="${index}" style="--chartItem-color:${chart_{{chartID}}.data.datasets[0].backgroundColor[index]};">
+                <span class="legend-color"></span>
+                <span class="legend-label">${label}</span>
+                </div>
+            `;
+            }).join('');
+
+            document.querySelectorAll("#{{legendId}} .legend-item").forEach(item => {
+            item.addEventListener("click", function() {
+                const index = parseInt(this.getAttribute("data-index"));
+                const dataset = chart_{{chartID}}.data.datasets[0];
+
+                dataset.hiddenData = dataset.hiddenData || [...dataset.data];
+                dataset.data[index] = dataset.data[index] !== null ? null : dataset.hiddenData[index];
+
+                this.classList.toggle("hidden", dataset.data[index] === null);
+
+                chart_{{chartID}}.update();
+            });
+            });
+        } else {
+            console.error("Element mit ID '{{legendId}}' nicht gefunden!");
+        }
     });
 </script>
-<!-- indexer::continue -->

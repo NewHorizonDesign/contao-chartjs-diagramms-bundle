@@ -17,6 +17,7 @@ namespace Newhorizondesign\ContaoChartjsDiagrammsBundle\Controller\ContentElemen
 use Contao\ContentModel;
 use Contao\CoreBundle\Controller\ContentElement\AbstractContentElementController;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsContentElement;
+use Contao\CoreBundle\Twig\FragmentTemplate;
 use Contao\StringUtil;
 use Contao\System;
 use Contao\Template;
@@ -26,11 +27,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
-#[AsContentElement(category: 'diagram_element')]
+#[AsContentElement(category: 'diagram_element', nestedFragments: true)]
 class ModDiagramElementController extends AbstractContentElementController
 {
     public const TYPE = 'mod_diagram_element';
-
     public function __construct
     (
         private Environment $twig,
@@ -39,8 +39,10 @@ class ModDiagramElementController extends AbstractContentElementController
         System::loadLanguageFile('tl_nhd_chartjs_diagramms', 'de');
     }
 
-    protected function getResponse(Template $template, ContentModel $model, Request $request): Response
+    protected function getResponse(FragmentTemplate $template, ContentModel $model, Request $request): Response
     {
+        $template->setName('@NewhorizondesignContaoChartjsDiagramms/content_element/mod_diagram_element.html.twig');
+
         $chartID = $template->configSelect;
         $chartNumber = $template->configSelect.$template->tstamp;
         ${'chartModel'.$chartNumber} = NewhorizondesignChartjsDiagrammsModel::findByID($chartID);

@@ -4,22 +4,11 @@ services:
         autoconfigure: true
         public: true
 
-    Newhorizondesign\ContaoChartjsDiagrammsBundle\:
-        resource: ../
-        exclude: ../{DependencyInjection,Resources,Model}
-        
-    Newhorizondesign\ContaoChartjsDiagrammsBundle\Controller\FrontendModule\ListenChartjsModulesController:
-        public: true
-        tags:
-            - { name: container.service_subscriber }
-            - { name: controller.service_arguments }
-        calls:
-            - [ setContainer, [ '@Psr\Container\ContainerInterface' ] ]
-        arguments:
-            - '@twig'
-    
-    # This configuration registers the IncludeCssJsListener service in the Symfony service container.
-    # The tilde (~) symbol indicates that the service should be autowired and autoconfigured by Symfony,
-    # meaning that Symfony will automatically determine the necessary dependencies and configuration for this service.
-    # Newhorizondesign\ContaoChartjsDiagrammsBundle\EventListener\IncludeCssJsListener: ~
+    _instanceof:
+        Symfony\Bundle\FrameworkBundle\Controller\AbstractController:
+            calls:
+                - [setContainer, ['@Psr\Container\ContainerInterface']]
+
+    Newhorizondesign\ContaoChartjsDiagrammsBundle\Controller\FrontendModule\ListenChartjsModulesController: ~
+    Newhorizondesign\ContaoChartjsDiagrammsBundle\Controller\ContentElement\ModDiagramElementController: ~
     

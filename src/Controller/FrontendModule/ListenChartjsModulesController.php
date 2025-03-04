@@ -18,6 +18,7 @@ use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\Routing\ScopeMatcher;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsFrontendModule;
+use Contao\CoreBundle\Twig\FragmentTemplate;
 use Contao\ModuleModel;
 use Contao\StringUtil;
 use Contao\System;
@@ -53,14 +54,15 @@ class ListenChartjsModulesController extends AbstractFrontendModuleController
         $services['contao.framework'] = ContaoFramework::class;
         $services['database_connection'] = Connection::class;
         $services['contao.routing.scope_matcher'] = ScopeMatcher::class;
-        $services['security.helper'] = Security::class;
         $services['translator'] = TranslatorInterface::class;
 
         return $services;
     }
 
-    public function getResponse(Template $template, ModuleModel $model, Request $request): Response
+    public function getResponse(FragmentTemplate $template, ModuleModel $model, Request $request): Response
     {
+        $template->setName('@NewhorizondesignContaoChartjsDiagramms/content_element/mod_diagram_element.html.twig');
+        
         $chartID = $template->configSelect;
         $chartNumber = $template->configSelect.$template->tstamp;
         ${'chartModel'.$chartNumber} = NewhorizondesignChartjsDiagrammsModel::findByID($chartID);

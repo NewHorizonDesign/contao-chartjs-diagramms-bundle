@@ -44,8 +44,7 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['configSelect'] = [
     'options_callback'        => function() {
         $options = array();
 
-        $tariffsConfigurations = Database::getInstance()->prepare('SELECT id,title FROM tl_nhd_chartjs_diagramms')
-            ->execute('title');
+        $tariffsConfigurations = Database::getInstance()->prepare('SELECT id,title FROM tl_nhd_chartjs_diagramms')->execute();
 
         while ($tariffsConfigurations->next()) {
             $options[$tariffsConfigurations->id] = $tariffsConfigurations->title;

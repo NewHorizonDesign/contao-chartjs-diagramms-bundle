@@ -12,41 +12,37 @@ declare(strict_types=1);
  * @link https://github.com/Newhorizondesign/contao-chartjs-diagramms-bundle
  */
 
-namespace Newhorizondesign\ContaoChartjsDiagrammsBundle\Controller\FrontendModule;
+namespace Newhorizondesign\ContaoChartjsDiagrammsBundle\Controller\ContentElement;
 
 use Contao\BackendTemplate;
-use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
-use Contao\CoreBundle\Framework\ContaoFramework;
+use Contao\ContentModel;
+use Contao\CoreBundle\Controller\ContentElement\AbstractContentElementController;
+use Contao\CoreBundle\DependencyInjection\Attribute\AsContentElement;
 use Contao\CoreBundle\Routing\ScopeMatcher;
-use Contao\CoreBundle\DependencyInjection\Attribute\AsFrontendModule;
 use Contao\CoreBundle\Twig\FragmentTemplate;
-use Contao\ModuleModel;
 use Contao\StringUtil;
 use Contao\System;
-use Contao\Template;
-use Doctrine\DBAL\Connection;
 use Newhorizondesign\ContaoChartjsDiagrammsBundle\Model\NewhorizondesignChartjsDiagrammsModel;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
-#[AsFrontendModule(category: 'ChartJS', template: 'listen_chartjs_modules')]
-class ListenChartjsModulesController extends AbstractFrontendModuleController
+#[AsContentElement(category: 'diagram_element', nestedFragments: true, template: 'content_element/dynamic_chart')]
+class DiagramElementController extends AbstractContentElementController
 {
-    public const TYPE = 'listen_chartjs_modules';
-
-    public function __construct(
+    public const TYPE = 'diagram_element';
+    
+    public function __construct
+    (
         private Environment $twig,
         public TranslatorInterface $trans,
         protected ScopeMatcher $scopeMatcher
-    )
-    {
+    ) {
         System::loadLanguageFile('tl_nhd_chartjs_diagramms', 'de');
     }
 
-    public function getResponse(FragmentTemplate $template, ModuleModel $model, Request $request): Response
+    protected function getResponse(FragmentTemplate $template, ContentModel $model, Request $request): Response
     {
         $chartID = $model->configSelect;
         $chartNumber = $model->configSelect.$model->tstamp;
@@ -64,7 +60,7 @@ class ListenChartjsModulesController extends AbstractFrontendModuleController
         if (!${'chartModel'.$chartNumber} && $this->scopeMatcher->isFrontendRequest($request)) {
             return new Response();
         }
-
+        
         $size = StringUtil::deserialize(${'chartModel'.$chartNumber}->size) ?? [0, 0];
         $canvasWidth = $size[0] ?? 300;
         $canvasHeight = $size[1] ?? 150;

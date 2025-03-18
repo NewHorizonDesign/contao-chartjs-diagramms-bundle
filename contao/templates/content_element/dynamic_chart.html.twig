@@ -1,0 +1,45 @@
+{% set widthValue = responsiveWidth ? "100%" : chartWidth ~ 'px' %}
+{% set heightValue = chartHeight is not empty ? chartHeight ~ 'px' : 'auto' %}
+{% set styleWidth = "width: " ~ widthValue %}
+{% set styleHeight = "height: " ~ heightValue %}
+{% set stylePaddingTop = title is defined ? "padding-top: 25px;" : "" %}
+{% set legendId = (cssID is defined ? cssID : chartID) ~ "-legend" %}
+{% set csp = app.request.attributes.get('csp_nonce') %}
+
+{% set canvas_wrapper_styles = attrs()
+    .set('style', styleWidth ~ '; ' ~ styleHeight ~ '; ' ~ stylePaddingTop)
+%}
+
+{% set canvas_wrapper_attributes = attrs()
+    .addClass('diagramms')
+    .mergeWith(canvas_wrapper_styles|default())
+    .setIfExists('nonce', csp)
+%}
+
+{% set legend_attributes = attrs()
+    .set('id', legendId)
+    .addClass('chart-legend')
+%}
+
+{% set canvas_attributes = attrs()
+    .set('id', cssID|default(chartID))
+%}
+
+{% block title %}
+    {% if title is defined %}
+        <{{titleUnit}}>{{title}}</{{titleUnit}}>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <section{{ canvas_wrapper_attributes }}>
+        {% block chart_canvas %}
+            <canvas {{canvas_attributes}}></canvas>
+        {% endblock %}
+    </section>
+    {% block chart_legend %}
+        <section{{ legend_attributes }}></section> 
+    {% endblock %}
+{% endblock %}
+
+<script nonce="{{ csp}}">document.addEventListener("DOMContentLoaded", function (){ const ctx_{{chartID}}=document.getElementById('{{cssID}}'); const dataSetsRaw={{chartData|raw}}; const dataSets=Array.isArray(dataSetsRaw) ? dataSetsRaw.map(item=>JSON.parse(item)) : JSON.parse(dataSetsRaw); let labels=[]; if (dataSets.length >0 && dataSets[0].labels){ labels=dataSets[0].labels;} else if (dataSets.length >0 && dataSets[0].data){ labels=Array.from({ length: dataSets[0].data.length}, (_, i)=>`Label ${i + 1}`);} const chartData_{{chartID}}={ labels: labels, datasets: dataSets}; const options_{{chartID}}={ {{chartOptions|raw}}, responsive:{{responsiveWidth}}, animation:{{chartAnimation}}, maintainAspectRatio:{{maintainAspectRatio}},}; window.chart_{{chartID}}=new Chart(ctx_{{chartID}},{ type: '{{chartType}}', data: chartData_{{chartID}}, options: options_{{chartID}}}); const legendContainerWrapper=document.getElementById("{{legendId}}"); if (legendContainerWrapper){ legendContainerWrapper.innerHTML=""; const isSingleDataset=chart_{{chartID}}.data.datasets.length===1; chart_{{chartID}}.data.datasets.forEach((dataset, datasetIndex)=>{ const datasetLabels=dataset.labels && dataset.labels.length >0 ? dataset.labels : Array.from({ length: dataset.data.length}, (_, i)=>`Label ${i + 1}`); const legendContainer=document.createElement("div"); legendContainer.classList.add("legend-container"); legendContainer.id="{{legendId}}_dataset" + datasetIndex; legendContainerWrapper.appendChild(legendContainer); legendContainer.innerHTML=` ${isSingleDataset ? '' : `<div class="legend-group">${dataset.label}</div>`} ${datasetLabels.map((label, index)=>{ const backgroundColor=dataset.backgroundColor[index] || '#000'; return ` <div class="legend-item" data-dataset-index="${datasetIndex}" data-index="${index}" style="--chartItem-color:${backgroundColor};"><span class="legend-color"></span><span class="legend-label">${label}</span></div>`;}).join('')} `; legendContainer.querySelectorAll(".legend-item").forEach(item=>{ item.addEventListener("click", function (){ const dataIndex=parseInt(this.getAttribute("data-index")); const datasetIndex=parseInt(this.getAttribute("data-dataset-index")); const dataset=chart_{{chartID}}.data.datasets[datasetIndex]; if (chart_{{chartID}}.config.type==='pie' || chart_{{chartID}}.config.type==='doughnut'){ dataset.hiddenData=dataset.hiddenData || [...dataset.data]; dataset.data[dataIndex]=dataset.data[dataIndex] !==null ? null : dataset.hiddenData[dataIndex]; this.classList.toggle("hidden", dataset.data[dataIndex]===null);} else{ const meta=chart_{{chartID}}.getDatasetMeta(datasetIndex); meta.data[dataIndex].hidden=!meta.data[dataIndex].hidden; this.classList.toggle("hidden", meta.data[dataIndex].hidden);} chart_{{chartID}}.update();});});});}}); </script>

@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 /*
- * This file is part of Contao ChartJS Diagramms.
+ * This file is part of Contao ChartJS Diagramms Bundle.
  *
  * (c) Newhorizondesign 2025 <service@newhorizon-design.de>
  * @license GPL-3.0-or-later
  * For the full copyright and license information,
  * please view the LICENSE file that was distributed with this source code.
- * @link https://github.com/Newhorizondesign/contao-chartjs-diagramms
+ * @link https://github.com/Newhorizondesign/contao-chartjs-diagramms-bundle
  */
 
 /**
@@ -40,14 +40,13 @@ $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['cssClass'] = ["CSS Klasse", "Hi
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['activeAnimation'] = ["Animationen deaktivieren?", "Falls zuviele Diagramme auf einer Seite existieren, sollte diese Option aktiviert werden!"];
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['responsiveWidth'] = ["Responsive Breite aktivieren?", "Soll der Chart auf die maximal mögliche Breite erstellt werden?"];
 $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['maintainAspectRatio'] = ["Beibehaltung des Seitenverhältnisses", "Soll das Verhältnis Breite gleich Höhe eingestellt werden?"];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['jsonInput'] = ["Datensatz für Diagramm", "Definiere hier den Datensatz. Mehr Informationen unter https://www.chartjs.org/docs/latest/charts/"];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['jsonInputLabels'] = ["Labels für Diagramm", "Definiere hier die Labels (diese sollten gleiche Anzahl wie Datensatz haben). Mehr Informationen unter https://www.chartjs.org/docs/latest/charts/"];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['jsonInputOptions'] = ["Optionen für Diagramm", "Definiere hier deine Optionen. Mehr Informationen unter https://www.chartjs.org/docs/latest/charts/"];
+$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['chartDatasets'] = ["Datensatz für Diagramm", "Definiere hier den Datensatz. Mehr Informationen unter https://www.chartjs.org/docs/latest/charts/"];
+$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['chartOptions'] = ["Optionen für Diagramm", "Definiere hier deine Optionen. Mehr Informationen unter https://www.chartjs.org/docs/latest/charts/"];
 
 /**
  * Errors
  */
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['error']['noModuleGiven'] = "Kein ChartJs Module definiert!";
+$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['error']['noModuleGiven'] = "Kein ChartType definiert / ausgewählt!";
 
 /**
  * Options
@@ -64,25 +63,14 @@ $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['chartTypes']['options'] = [
 /**
  * Defaults
  */
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInputLabels']['default'] = json_encode("
-[
-    'legend 1',
-    'legend 2',
-    'legend 3',
-    'legend 4',
-    'legend 5',
-    'legend 6'
-]
-");
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInputOptions']['default'] = json_encode("
+$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartOptions']['default'] = json_encode("
 plugins: {
 	legend: {
+        // if Display True is set, the legend is displayed in the canvas and deactivated outside of it on Template!
+        display: false,
 		align: 'start',
 		position: 'bottom',
         labels: {
-            // if Display True is set, the legend is displayed in the canvas and deactivated outside of it on Template!
-			display: false 
-            anchor: 'center',
             position: 'bottom',
             usePointStyle: true,
             font: {
@@ -91,7 +79,7 @@ plugins: {
             generateLabels(chart) {
                 const labels = chart.data.labels;
                 return labels.map(function(label, i) {
-                    const value = chart.data.datasets[0].data[i];
+                    const value = chart.Rdata.datasets[0].data[i];
                     const meta = chart.getDatasetMeta(0);
                     const style = meta.controller.getStyle(i);
                     return {
@@ -127,7 +115,7 @@ plugins: {
 	}
 }
 ");
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInput']['default']['bar'] = json_encode("
+$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default']['bar'] = "
 data: [ // fill with Values same Count into Label
 	6,
 	39.20,
@@ -148,16 +136,16 @@ borderWidth: 0,
 hoverOffset: 6,
 borderWidth: 0,
 hoverBorderWidth: 0
-");
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInput']['default']['area'] = json_encode("{
+";
+$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default']['area'] = "{
     {fill: 'origin'},      // 0: fill to 'origin'
     {fill: '+2'},          // 1: fill to dataset 3
     {fill: 1},             // 2: fill to dataset 1
     {fill: false},         // 3: no fill
     {fill: '-2'},          // 4: fill to dataset 2
     {fill: {value: 25}}    // 5: fill to axis value 25
-}");
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInput']['default']['bubble'] = json_encode("
+}";
+$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default']['bubble'] = "
 data: [{
     x: 20,
     y: 30,
@@ -168,14 +156,14 @@ data: [{
     r: 10
 }],
 backgroundColor: 'rgb(255, 99, 132)'
-");
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInput']['default']['line'] = json_encode("
+";
+$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default']['line'] = "
 data: [65, 59, 80, 81, 56, 55, 40],
 fill: false,
 borderColor: 'rgb(75, 192, 192)',
 tension: 0.1
-");
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInput']['default']['scatter'] = json_encode("
+";
+$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default']['scatter'] = "
 data: [{
     x: -10,
     y: 0
@@ -190,8 +178,8 @@ data: [{
     y: 5.5
 }],
 backgroundColor: 'rgb(255, 99, 132)'
-");
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInput']['default']['pie'] = json_encode("
+";
+$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default']['pie'] = "
 data: [
     300,
     50,
@@ -203,8 +191,8 @@ backgroundColor: [
   'rgb(255, 205, 86)'
 ],
 hoverOffset: 4
-");
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInput']['default']['doughnut'] = json_encode("
+";
+$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default']['doughnut'] = "
 data: [
     300,
     50,
@@ -216,4 +204,4 @@ backgroundColor: [
   'rgb(255, 205, 86)'
 ],
 hoverOffset: 4
-");
+";

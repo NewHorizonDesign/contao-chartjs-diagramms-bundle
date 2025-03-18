@@ -1,0 +1,157 @@
+{% set fieldConfig = arrConfiguration %}
+
+
+<div class="{{ strPrefix }}">
+    <h3>{{ strLabel }}</h3>
+    <div id="dynamic-textareas" class="widget-group">
+        {% for value in varValue %}
+            <div class="textarea-container widget w50">
+                <h3><label for="textarea-{{ loop.index }}">Datensatz {{ loop.index }}</label></h3>
+                <textarea 
+                    id="textarea-{{ loop.index }}" 
+                    class="tl_textarea noresize long rte" 
+                    name="{{ strName }}[]" 
+                    rows="12" 
+                    cols="80"
+                    {% if fieldConfig.required %} required="required" {% endif %}
+                    data-rte="ace|js"
+                >{{ value }}</textarea>
+                <button type="button" class="delete-textarea">✖</button>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="widget-group m12">
+        <div class="widget w25">
+            <button type="button" id="add-textarea">+ Neues Feld</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        function getContaoTheme() {
+            let body = document.querySelector('html');
+            if (!body) return "ace/theme/clouds"; // Falls body nicht gefunden wird, Standard setzen
+            let theme = body.getAttribute('data-color-scheme');
+            console.log("📌 `data-color-scheme` ausgelesen:", theme);
+            return theme === 'dark' ? "ace/theme/twilight" : "ace/theme/clouds";
+        }
+
+        let currentTheme = getContaoTheme(); // Theme sofort setzen
+        let container = document.getElementById('dynamic-textareas');
+        let addButton = document.getElementById('add-textarea');
+
+        function initializeAceEditor(target) {
+            if (!target || target.dataset.aceInitialized) {
+                return;
+            }
+
+            let editorId = target.id + "-editor";
+            let div = document.createElement("div");
+            div.id = editorId;
+            div.style.width = "100%";
+            div.style.height = "200px";
+
+            target.style.display = "none"; // Original-Textarea verstecken
+            target.parentElement.insertBefore(div, target);
+
+            let editor = ace.edit(editorId);
+            editor.setTheme(currentTheme);
+            editor.session.setMode("ace/mode/javascript");
+            editor.setOptions({
+                maxLines: Infinity,
+                wrap: true
+            });
+
+            editor.setValue(target.value, -1);
+            editor.session.on('change', function () {
+                target.value = editor.getValue();
+            });
+
+            target.dataset.aceEditorId = editorId;
+            target.dataset.aceInitialized = "true"; // Markiere, dass das Feld bereits initialisiert wurde
+            console.log("🎨 ACE-Editor initialisiert für:", target.id, "mit Theme:", currentTheme);
+        }
+
+        function reinitializeAceEditors() {
+            document.querySelectorAll('textarea[data-rte="ace|js"]').forEach(target => {
+                initializeAceEditor(target);
+            });
+        }
+
+        // 🟢 1️⃣ ACE-Theme direkt beim Laden setzen
+        console.log("🔄 Initialisiere ACE-Editor mit Theme:", currentTheme);
+        reinitializeAceEditors();
+
+        // 🟢 2️⃣ Nach DOM Loaded nochmal sicherstellen, dass das richtige Theme gesetzt ist
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("✅ DOM geladen – Theme nochmals prüfen...");
+            currentTheme = getContaoTheme();
+            document.querySelectorAll('.ace_editor').forEach(editorElement => {
+                let editor = ace.edit(editorElement);
+                editor.setTheme(currentTheme);
+            });
+        });
+
+        // 🟢 3️⃣ Neues Feld hinzufügen und ACE-Editor aktivieren
+        addButton.addEventListener('click', function () {
+            let countedContainer = container.querySelectorAll('.textarea-container').length + 1;
+            let uniqueId = 'textarea-' + Math.random().toString(36).substr(2, 9);
+            let div = document.createElement('div');
+
+            div.classList.add('textarea-container', 'widget', 'w50');
+            div.innerHTML = `
+                <h3><label class="ctrl_text_widget" for="${uniqueId}">Datensatz ${countedContainer}</label></h3>
+                <textarea id="${uniqueId}" class="tl_textarea ace-editor" name="{{ strName }}[]" rows="12" cols="80" data-rte="ace|js"></textarea>
+                <button type="button" class="delete-textarea">✖</button>
+            `;
+            container.appendChild(div);
+
+            let newTextarea = document.getElementById(uniqueId);
+            initializeAceEditor(newTextarea);
+        });
+
+        // 🟢 4️⃣ Wenn Contao das Backend per AJAX aktualisiert (z.B. nach Speichern ohne Zurück)
+        document.addEventListener('ajax_change', function () {
+            console.log("🔄 Contao AJAX Update erkannt – RTE wird neu initialisiert!");
+            setTimeout(reinitializeAceEditors, 500);
+        });
+
+        // 🟢 5️⃣ Wenn sich das Contao-Theme ändert, ACE-Theme sofort updaten
+        window.addEventListener('contao--color-scheme:change', (event) => {
+            console.log("🌙 Event `contao--color-scheme:change` empfangen:", event.detail.mode);
+            currentTheme = event.detail.mode === 'dark' ? "ace/theme/twilight" : "ace/theme/clouds";
+
+            document.querySelectorAll('.ace_editor').forEach(editorElement => {
+                let editor = ace.edit(editorElement);
+                editor.setTheme(currentTheme);
+            });
+
+            console.log("🎨 Theme nach Event-Wechsel aktualisiert:", currentTheme);
+        });
+
+        // 🟢 6️⃣ Falls sich das Contao-Theme ohne Event ändert (Fallback mit MutationObserver)
+        const observer = new MutationObserver(() => {
+            let newTheme = getContaoTheme();
+            if (newTheme !== currentTheme) {
+                console.log("🔄 Theme wurde durch Contao geändert (MutationObserver erkannt):", newTheme);
+                currentTheme = newTheme;
+
+                document.querySelectorAll('.ace_editor').forEach(editorElement => {
+                    let editor = ace.edit(editorElement);
+                    editor.setTheme(currentTheme);
+                });
+            }
+        });
+
+        observer.observe(document.body, { attributes: true, attributeFilter: ['data-color-scheme'] });
+
+        // 🟢 7️⃣ Event-Listener für Löschen-Button
+        container.addEventListener('click', function (e) {
+            if (e.target.classList.contains('delete-textarea')) {
+                e.target.parentElement.remove();
+            }
+        });
+
+    })();
+</script>

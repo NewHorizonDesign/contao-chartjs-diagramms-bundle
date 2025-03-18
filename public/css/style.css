@@ -19,6 +19,18 @@
   }
 }
 
+.legend-container {
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.legend-group {
+  font-weight: 700;
+}
+
 .legend-item {
   cursor: pointer;
   display: flex;

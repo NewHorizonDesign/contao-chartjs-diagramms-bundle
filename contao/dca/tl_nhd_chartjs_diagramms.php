@@ -1,25 +1,23 @@
 <?php
 
-declare(strict_types=1);
-
 /*
- * This file is part of Contao ChartJS Diagramms.
+ * This file is part of Contao ChartJS Diagramms Bundle.
  *
  * (c) Newhorizondesign 2025 <service@newhorizon-design.de>
  * @license GPL-3.0-or-later
  * For the full copyright and license information,
  * please view the LICENSE file that was distributed with this source code.
- * @link https://github.com/Newhorizondesign/contao-chartjs-diagramms
+ * @link https://github.com/Newhorizondesign/contao-chartjs-diagramms-bundle
  */
 
 use Contao\Backend;
+use Contao\Controller;
+use Contao\Database;
 use Contao\DataContainer;
 use Contao\DC_Table;
+use Contao\Environment;
 use Contao\Input;
 
-/**
- * Table tl_nhd_chartjs_diagramms
- */
 $GLOBALS['TL_DCA']['tl_nhd_chartjs_diagramms'] = [
     'config'      => [
         'dataContainer'    => DC_Table::class,
@@ -29,6 +27,9 @@ $GLOBALS['TL_DCA']['tl_nhd_chartjs_diagramms'] = [
                 'id' => 'primary'
             ]
         ],
+        'onload_callback' => [
+            ['tl_nhd_chartjs_diagramms', 'reloadOnLoad']
+        ]
     ],
     'list'        => [
         'sorting'           => [
@@ -78,7 +79,7 @@ $GLOBALS['TL_DCA']['tl_nhd_chartjs_diagramms'] = [
     ],
     'palettes'    => [
         '__selector__' => ['addSubpalette'],
-        'default'      => '{first_legend},chartGroup,title,chartType,size,cssID,cssClass;{second_legend},activeAnimation,responsiveWidth,maintainAspectRatio,singleSRC,jsonInput,jsonInputLabels,jsonInputOptions;'
+        'default'      => '{first_legend},chartGroup,title,chartType,size,cssID,cssClass;{second_legend},activeAnimation,responsiveWidth,maintainAspectRatio,singleSRC,chartDatasets,chartOptions;'
     ],
     'fields'      => [
         'chartGroup'   => [
@@ -169,40 +170,29 @@ $GLOBALS['TL_DCA']['tl_nhd_chartjs_diagramms'] = [
             ],
             'eval'  => ['tl_class' => 'long'],
         ],
-        'jsonInput'  => [
-            'inputType' => 'textarea',
+        'chartDatasets'  => [
+            'inputType' => 'multiTextWidget',
             'exclude'   => true,
-            'search'    => true,
-            'filter'    => true,
-            'sorting'   => true,
-            'eval'      => ['rte' => 'ace|js', 'mandatory' => true, 'tl_class' => 'long clr m12'],
-            'sql'       => "text NOT NULL default ''",
-            'load_callback' => [
-                ['tl_nhd_chartjs_diagramms', 'jsonInputCallback']
-            ]
+            'eval'      => [
+                'rte' => 'ace|js', 
+                'tl_class' => 'long clr', 
+                'allowHtml' => true, 
+                'required' => true],
+                'sql'       => "blob NULL"
+            // 'load_callback' => [
+            //     ['tl_nhd_chartjs_diagramms', 'datasetsCallback']
+            // ]
         ],
-        'jsonInputLabels'  => [
+        'chartOptions'  => [
             'inputType' => 'textarea',
             'exclude'   => true,
             'search'    => true,
             'filter'    => true,
             'sorting'   => true,
-            'eval'      => ['rte' => 'ace|js', 'mandatory' => true, 'tl_class' => 'long clr m12'],
+            'eval'      => ['rte' => 'ace|js', 'mandatory' => true, 'multiple' => true,'tl_class' => 'long clr m12'],
             'sql'       => "text NOT NULL default ''",
             'load_callback' => [
-                ['tl_nhd_chartjs_diagramms', 'jsonInputLabelsCallback']
-            ]
-        ],
-        'jsonInputOptions'  => [
-            'inputType' => 'textarea',
-            'exclude'   => true,
-            'search'    => true,
-            'filter'    => true,
-            'sorting'   => true,
-            'eval'      => ['rte' => 'ace|js', 'mandatory' => true, 'tl_class' => 'long clr m12'],
-            'sql'       => "text NOT NULL default ''",
-            'load_callback' => [
-                ['tl_nhd_chartjs_diagramms', 'jsonInputOptionsCallback']
+                ['tl_nhd_chartjs_diagramms', 'chartOptionsCallback']
             ]
         ],
     ]
@@ -210,52 +200,68 @@ $GLOBALS['TL_DCA']['tl_nhd_chartjs_diagramms'] = [
 
 class tl_nhd_chartjs_diagramms extends Backend
 {
-    public function jsonInputOptionsCallback($varValue, DataContainer $dc)
+    public function reloadOnLoad($dc)
     {
-        if(!empty($varValue)) {
-            return $varValue;
-        } else {
-            return json_decode($GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInputOptions']['default']);
+        if (!$dc->id) {
+            return;
         }
+    
+        $db = Database::getInstance();
+
+        // Datensatz aus der DB abrufen
+        $record = $db->prepare("SELECT chartType, cssID, chartDatasets FROM tl_nhd_chartjs_diagramms WHERE id=?")
+                    ->execute($dc->id)
+                    ->fetchAssoc();
+
+        // Falls `chartType` leer ist, Standardwert setzen
+        if (empty($record['chartType'])) {
+            $db->prepare("UPDATE tl_nhd_chartjs_diagramms SET chartType=? WHERE id=?")
+            ->execute('bar', $dc->id);
+        }
+
+        // Falls `cssID` leer ist, Standardwert setzen
+        if (empty($record['cssID'])) {
+            $db->prepare("UPDATE tl_nhd_chartjs_diagramms SET cssID=? WHERE id=?")
+            ->execute('default', $dc->id);
+        }       
     }
 
-    public function jsonInputLabelsCallback($varValue, DataContainer $dc)
+    public function chartOptionsCallback($value, DataContainer $dc)
     {
-        if(!empty($varValue)) {
-            return $varValue;
-        } else {
-            return json_decode($GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInputLabels']['default']);
+        if ($value) {
+            return $value;
         }
+
+        return json_decode($GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartOptions']['default']);
     }
 
-    public function jsonInputCallback($varValue, DataContainer $dc)
+    public function datasetsCallback($value, DataContainer $dc)
     {
-        if(!empty($varValue)) {
-            return $varValue;
-        } else {
-            switch($dc->activeRecord->chartType) {
-                case 'bar':
-                    return json_decode($GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInput']['default']['bar']);
-                    break;
-                case 'bubble':
-                    return json_decode($GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInput']['default']['bubble']);
-                    break;
-                case 'line':
-                    return json_decode($GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInput']['default']['line']);
-                    break;
-                case 'scatter':
-                    return json_decode($GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInput']['default']['scatter']);
-                    break;
-                case 'pie':
-                    return json_decode($GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInput']['default']['pie']);
-                    break;
-                case 'doughnut':
-                    return json_decode($GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['jsonInput']['default']['doughnut']);
-                    break;
-                default:
-                    return " ";
-                    break;
-            }
+        $dataset = '';
+
+        if (!$dc->activeRecord || !$dc->id) {
+            $dataset = !empty($value) ? $value : '';
         }
+        
+        $db = Database::getInstance();
+        $record = $db->prepare("SELECT chartType, chartDatasets FROM tl_nhd_chartjs_diagramms WHERE id=?")
+                 ->execute($dc->id)
+                 ->fetchAssoc();
+        
+        if (!$record) {
+            return $this->getDefaultDatasets('bar');
+        }
+        
+        if ($record['chartType'] !== $dc->activeRecord->chartType || empty($record['chartDatasets'])) {
+            return $this->getDefaultDatasets($dc->activeRecord->chartType);
+        }
+
+        return $dataset;
     }
+
+    private function getDefaultDatasets($chartType): string
+    {
+        return $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default'][$chartType] ?? '';
+    }
+
 }

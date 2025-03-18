@@ -3,37 +3,36 @@
 declare(strict_types=1);
 
 /*
- * This file is part of Contao ChartJS Diagramms.
+ * This file is part of Contao ChartJS Diagramms Bundle.
  *
  * (c) Newhorizondesign 2025 <service@newhorizon-design.de>
  * @license GPL-3.0-or-later
  * For the full copyright and license information,
  * please view the LICENSE file that was distributed with this source code.
- * @link https://github.com/Newhorizondesign/contao-chartjs-diagramms
+ * @link https://github.com/Newhorizondesign/contao-chartjs-diagramms-bundle
  */
 
 use Contao\CoreBundle\DataContainer\PaletteManipulator;
 use Contao\Database;
-use Newhorizondesign\ContaoChartjsDiagrammsBundle\Controller\ContentElement\ModDiagramElementController;
+use Newhorizondesign\ContaoChartjsDiagrammsBundle\Controller\FrontendModule\ListenChartjsModulesController;
 
 /**
- * Content elements
+ * Frontend modules
  */
-$GLOBALS['TL_DCA']['tl_content']['palettes'][ModDiagramElementController::TYPE] = '{type_legend},type,configSelect;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID;{invisible_legend:hide},invisible,start,stop';
+$GLOBALS['TL_DCA']['tl_module']['palettes'][ListenChartjsModulesController::TYPE] = '{title_legend},name,headline,type,configSelect;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID';
 
 /**
  * Palette Manipulator
  */
 PaletteManipulator::create()
-    ->addLegend('configSelect', 'type_legend', PaletteManipulator::POSITION_APPEND)
-    ->applyToPalette('default', 'tl_content')
+    ->addLegend('configSelect', 'title_legend', PaletteManipulator::POSITION_APPEND)
+    ->applyToPalette('default', 'tl_module')
 ;
 
 /**
- *
  * Add additional Fields
  */
-$GLOBALS['TL_DCA']['tl_content']['fields']['configSelect'] = [
+$GLOBALS['TL_DCA']['tl_module']['fields']['configSelect'] = [
     'label'                   => &$GLOBALS['TL_LANG']['tl_content']['fields']['configSelect'],
     'exclude'                 => true,
     'filter'                  => true,

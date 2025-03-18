@@ -3,36 +3,38 @@
 declare(strict_types=1);
 
 /*
- * This file is part of Contao ChartJS Diagramms.
+ * This file is part of Contao ChartJS Diagramms Bundle.
  *
  * (c) Newhorizondesign 2025 <service@newhorizon-design.de>
  * @license GPL-3.0-or-later
  * For the full copyright and license information,
  * please view the LICENSE file that was distributed with this source code.
- * @link https://github.com/Newhorizondesign/contao-chartjs-diagramms
+ * @link https://github.com/Newhorizondesign/contao-chartjs-diagramms-bundle
  */
 
 use Contao\CoreBundle\DataContainer\PaletteManipulator;
 use Contao\Database;
-use Newhorizondesign\ContaoChartjsDiagrammsBundle\Controller\FrontendModule\ListenChartjsModulesController;
+use Contao\StringUtil;
+use Newhorizondesign\ContaoChartjsDiagrammsBundle\Controller\ContentElement\DiagramElementController;
 
 /**
- * Frontend modules
+ * Content elements
  */
-$GLOBALS['TL_DCA']['tl_module']['palettes'][ListenChartjsModulesController::TYPE] = '{title_legend},name,headline,type,configSelect;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID';
+$GLOBALS['TL_DCA']['tl_content']['palettes'][DiagramElementController::TYPE] = '{type_legend},type,configSelect;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID;{invisible_legend:hide},invisible,start,stop';
 
 /**
  * Palette Manipulator
  */
 PaletteManipulator::create()
-    ->addLegend('configSelect', 'title_legend', PaletteManipulator::POSITION_APPEND)
-    ->applyToPalette('default', 'tl_module')
+    ->addLegend('configSelect', 'type_legend', PaletteManipulator::POSITION_APPEND)
+    ->applyToPalette('default', 'tl_content')
 ;
 
 /**
+ *
  * Add additional Fields
  */
-$GLOBALS['TL_DCA']['tl_module']['fields']['configSelect'] = [
+$GLOBALS['TL_DCA']['tl_content']['fields']['configSelect'] = [
     'label'                   => &$GLOBALS['TL_LANG']['tl_content']['fields']['configSelect'],
     'exclude'                 => true,
     'filter'                  => true,
@@ -47,7 +49,7 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['configSelect'] = [
         $tariffsConfigurations = Database::getInstance()->prepare('SELECT id,title FROM tl_nhd_chartjs_diagramms')->execute();
 
         while ($tariffsConfigurations->next()) {
-            $options[$tariffsConfigurations->id] = $tariffsConfigurations->title;
+            $options[$tariffsConfigurations->id] = StringUtil::deserialize($tariffsConfigurations->title)['value'];
         }
 
         return $options;

@@ -9,6 +9,10 @@ services:
             calls:
                 - [setContainer, ['@Psr\Container\ContainerInterface']]
 
+    Newhorizondesign\ContaoChartjsDiagrammsBundle\Widget\Backend\MultiTextWidget:
+        tags:
+            - { name: contao.form.widget, alias: multiTextWidget }
+
+    Newhorizondesign\ContaoChartjsDiagrammsBundle\EventListener\IncludeCssJsListener: ~
     Newhorizondesign\ContaoChartjsDiagrammsBundle\Controller\FrontendModule\ListenChartjsModulesController: ~
-    Newhorizondesign\ContaoChartjsDiagrammsBundle\Controller\ContentElement\ModDiagramElementController: ~
-    
+    Newhorizondesign\ContaoChartjsDiagrammsBundle\Controller\ContentElement\DiagramElementController: ~

@@ -23,7 +23,7 @@
   width: 100%;
   display: flex;
   flex-wrap: nowrap;
-  flex-direction: row;
+  flex-direction: wrap;
   gap: 10px;
 }
 

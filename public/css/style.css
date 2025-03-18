@@ -22,8 +22,8 @@
 .legend-container {
   width: 100%;
   display: flex;
-  flex-wrap: nowrap;
-  flex-direction: wrap;
+  flex-wrap: wrap;
+  flex-direction: row;
   gap: 10px;
 }
 

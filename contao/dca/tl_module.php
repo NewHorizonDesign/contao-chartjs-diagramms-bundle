@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 use Contao\CoreBundle\DataContainer\PaletteManipulator;
 use Contao\Database;
+use Contao\StringUtil;
 use Newhorizondesign\ContaoChartjsDiagrammsBundle\Controller\FrontendModule\ListenChartjsModulesController;
 
 /**
@@ -44,10 +45,12 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['configSelect'] = [
     'options_callback'        => function() {
         $options = array();
 
-        $tariffsConfigurations = Database::getInstance()->prepare('SELECT id,title FROM tl_nhd_chartjs_diagramms')->execute();
-
+        $tariffsConfigurations = Database::getInstance()->prepare('SELECT id,title,chartGroup FROM tl_nhd_chartjs_diagramms')->execute();
+        
         while ($tariffsConfigurations->next()) {
-            $options[$tariffsConfigurations->id] = $tariffsConfigurations->title;
+            $title = StringUtil::deserialize($tariffsConfigurations->title)['value'] ?? '';
+            $selectLabel = $tariffsConfigurations->chartGroup ? sprintf('%s (%s)', $title, $tariffsConfigurations->chartGroup ?? '') : $title;
+            $options[$tariffsConfigurations->id] = $selectLabel;
         }
 
         return $options;

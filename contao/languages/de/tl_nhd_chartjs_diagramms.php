@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of Contao ChartJS Diagramms Bundle.
  *
@@ -12,196 +10,258 @@ declare(strict_types=1);
  * @link https://github.com/Newhorizondesign/contao-chartjs-diagramms-bundle
  */
 
-/**
- * Legends
- */
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['first_legend'] = "Basis Einstellungen";
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['second_legend'] = "Erweiterte Einstellungen";
+use Contao\Backend;
+use Contao\Controller;
+use Contao\Database;
+use Contao\DataContainer;
+use Contao\DC_Table;
+use Contao\Environment;
+use Contao\Input;
 
-/**
- * Operations
- */
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['edit'] = ["Datensatz mit ID: %s bearbeiten", "Datensatz mit ID: %s bearbeiten"];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['copy'] = ["Datensatz mit ID: %s kopieren", "Datensatz mit ID: %s kopieren"];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['delete'] = ["Datensatz mit ID: %s löschen", "Datensatz mit ID: %s löschen"];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['show'] = ["Datensatz mit ID: %s ansehen", "Datensatz mit ID: %s ansehen"];
-
-/**
- * Fields
- */
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['chartGroup'] = ["Gruppe", "Geben Sie den eine Übergruppe an um Diagramme zu gruppieren (optional)"];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['title'] = ["Titel", "Geben Sie den Titel ein"];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['chartType'] = ["Diagrammauswahl", "Wählen Sie Ihr gewünschtes Diagramm aus."];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['checkboxField'] = ["Chosen Feld", "Wählen Sie aus."];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['size'] = ["Diagrammgröße definieren", "Geben Sie die Werte Breite und Höhe in px ein"];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['addSubpalette'] = ["Erweiterte Einstellungen", "Hier können Sie die erweiterten Einstellungen aktivieren."];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['cssID'] = ["CSS ID", "Hier können Sie eine ID eingeben."];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['cssClass'] = ["CSS Klasse", "Hier können Sie beliebig viele Klassen eingeben."];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['activeAnimation'] = ["Animationen deaktivieren?", "Falls zuviele Diagramme auf einer Seite existieren, sollte diese Option aktiviert werden!"];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['responsiveWidth'] = ["Responsive Breite aktivieren?", "Soll der Chart auf die maximal mögliche Breite erstellt werden?"];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['maintainAspectRatio'] = ["Beibehaltung des Seitenverhältnisses", "Soll das Verhältnis Breite gleich Höhe eingestellt werden?"];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['chartDatasets'] = ["Datensatz für Diagramm", "Definiere hier den Datensatz. Mehr Informationen unter https://www.chartjs.org/docs/latest/charts/"];
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['chartOptions'] = ["Optionen für Diagramm", "Definiere hier deine Optionen. Mehr Informationen unter https://www.chartjs.org/docs/latest/charts/"];
-
-/**
- * Errors
- */
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['error']['noModuleGiven'] = "Kein ChartType definiert / ausgewählt!";
-
-/**
- * Options
- */
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['chartTypes']['options'] = [
-    'bar' => 'Bar Diagramm',
-    'bubble' => 'Blasen Diagramm',
-    'line' => 'Linien Diagramm',
-    'scatter' => 'Streu Diagramm',
-    'pie' => 'Pie Diagramm',
-    'doughnut' => 'Donut Diagramm'
+$GLOBALS['TL_DCA']['tl_nhd_chartjs_diagramms'] = [
+    'config'      => [
+        'dataContainer'    => DC_Table::class,
+        'enableVersioning' => true,
+        'sql'              => [
+            'keys' => [
+                'id' => 'primary'
+            ]
+        ],
+        'onload_callback' => [
+            ['tl_nhd_chartjs_diagramms', 'reloadOnLoad']
+        ]
+    ],
+    'list'        => [
+        'sorting'           => [
+            'mode'        => 1,
+            'fields'      => ['chartGroup','title'],
+            'flag'        => 1,
+            'panelLayout' => 'filter;sort,search,limit',
+            'group_callback' => ['tl_nhd_chartjs_diagramms']
+        ],
+        'label'             => [
+            'fields' => ['id','title'],
+            'showColumns'  => true,
+            'format' => '%s',
+        ],
+        'global_operations' => [
+            'all' => [
+                'label'      => &$GLOBALS['TL_LANG']['MSC']['all'],
+                'href'       => 'act=select',
+                'class'      => 'header_edit_all',
+                'attributes' => 'onclick="Backend.getScrollOffset()" accesskey="e"'
+            ]
+        ],
+        'operations'        => [
+            'edit'   => [
+                'label' => &$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['edit'],
+                'href'  => 'act=edit',
+                'icon'  => 'edit.svg'
+            ],
+            'copy'   => [
+                'label' => &$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['copy'],
+                'href'  => 'act=copy',
+                'icon'  => 'copy.svg'
+            ],
+            'delete' => [
+                'label'      => &$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['delete'],
+                'href'       => 'act=delete',
+                'icon'       => 'delete.svg',
+                'attributes' => 'onclick="if(!confirm(\'' . ($GLOBALS['TL_LANG']['MSC']['deleteConfirm'] ?? null) . '\'))return false;Backend.getScrollOffset()"'
+            ],
+            'show'   => [
+                'label'      => &$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['show'],
+                'href'       => 'act=show',
+                'icon'       => 'show.svg',
+                'attributes' => 'style="margin-right:3px"'
+            ],
+        ]
+    ],
+    'palettes'    => [
+        '__selector__' => ['addSubpalette'],
+        'default'      => '{first_legend},chartGroup,title,chartType,size,cssID,cssClass;{second_legend},activeAnimation,responsiveWidth,maintainAspectRatio,singleSRC,chartDatasets,chartOptions;'
+    ],
+    'fields'      => [
+        'chartGroup'   => [
+            'inputType' => 'text',
+            'exclude'   => true,
+            'search'    => true,
+            'filter'    => true,
+            'sorting'   => true,
+            'flag'      => 1,
+            'eval'      => ['mandatory' => false, 'maxlength' => 255, 'tl_class' => 'long clr'],
+            'sql'       => "varchar(255) NOT NULL default ''"
+        ],
+        'id'             => [
+            'sql' => "int(10) unsigned NOT NULL auto_increment"
+        ],
+        'tstamp'  => [
+            'sql' => "int(10) unsigned NOT NULL default '0'"
+        ],
+        'title'          => [
+            'inputType' => 'inputUnit',
+            'options' => ['h2', 'h3', 'h4', 'h5', 'h6'],
+            'exclude'   => true,
+            'search'    => true,
+            'filter'    => true,
+            'sorting'   => true,
+            'flag'      => 1,
+            'eval'      => ['mandatory' => true, 'maxlength' => 255, 'tl_class' => 'long clr'],
+            'sql'       => "varchar(255) NOT NULL default ''"
+        ],
+        'chartType'    => [
+            'inputType' => 'select',
+            'exclude'   => true,
+            'search'    => true,
+            'filter'    => true,
+            'sorting'   => true,
+            'options'   => &$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['chartTypes']['options'],
+            'eval'      => ['submitOnChange' => true, 'includeBlankOption' => false, 'tl_class' => 'w50'],
+            'sql'       => "varchar(255) NOT NULL default ''",
+        ],
+        'size' => [
+            'inputType' => 'text',
+            'exclude'   => true,
+            'search'    => true,
+            'filter'    => true,
+            'sorting'   => true,
+            'eval'      => ['multiple' => true, 'size' => 2, 'decodeEntities' => true, 'tl_class' => 'w50'],
+            'sql'       => "varchar(255) NOT NULL default ''"
+        ],
+        'cssID'  => [
+            'inputType' => 'text',
+            'exclude'   => true,
+            'search'    => true,
+            'filter'    => true,
+            'sorting'   => true,
+            'eval'      => ['mandatory' => true, 'maxlength' => 255, 'tl_class' => 'w50'],
+            'sql'       => "varchar(255) NOT NULL default ''"
+        ],
+        'cssClass'  => [
+            'inputType' => 'text',
+            'exclude'   => true,
+            'search'    => true,
+            'filter'    => true,
+            'sorting'   => true,
+            'eval'      => ['mandatory' => false, 'maxlength' => 255, 'tl_class' => 'w50'],
+            'sql'       => "varchar(255) NOT NULL default ''"
+        ],
+        'activeAnimation'  => [
+            'inputType'  => 'checkbox',
+            'sql' => [
+                'type'  => 'boolean',
+                'default'  => false,
+            ],
+            'eval'  => ['tl_class' => 'long'],
+        ],
+        'responsiveWidth' => [
+            'inputType' => 'checkbox',
+            'sql' => [
+                'type' => 'boolean',
+                'default' => false,
+            ],
+            'eval'  => ['tl_class' => 'long'],
+        ],
+        'maintainAspectRatio' => [
+            'inputType' => 'checkbox',
+            'sql' => [
+                'type' => 'boolean',
+                'default' => true,
+            ],
+            'eval'  => ['tl_class' => 'long'],
+        ],
+        'chartDatasets'  => [
+            'inputType' => 'multiTextWidget',
+            'exclude'   => true,
+            'eval'      => [
+                'rte' => 'ace|js', 
+                'tl_class' => 'long clr', 
+                'allowHtml' => true, 
+                'required' => true],
+                'sql'       => "blob NULL"
+            // 'load_callback' => [
+            //     ['tl_nhd_chartjs_diagramms', 'datasetsCallback']
+            // ]
+        ],
+        'chartOptions'  => [
+            'inputType' => 'textarea',
+            'exclude'   => true,
+            'search'    => true,
+            'filter'    => true,
+            'sorting'   => true,
+            'eval'      => ['rte' => 'ace|js', 'mandatory' => true, 'multiple' => true,'tl_class' => 'long clr m12'],
+            'sql'       => "text NOT NULL default ''",
+            'load_callback' => [
+                ['tl_nhd_chartjs_diagramms', 'chartOptionsCallback']
+            ]
+        ],
+    ]
 ];
 
-/**
- * Defaults
- */
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartOptions']['default'] = json_encode("
-plugins: {
-	legend: {
-        // if Display True is set, the legend is displayed in the canvas and deactivated outside of it on Template!
-        display: false,
-		align: 'start',
-		position: 'bottom',
-        labels: {
-            position: 'bottom',
-            usePointStyle: true,
-            font: {
-                size: 10
-            },
-            generateLabels(chart) {
-                const labels = chart.data.labels;
-                return labels.map(function(label, i) {
-                    const value = chart.Rdata.datasets[0].data[i];
-                    const meta = chart.getDatasetMeta(0);
-                    const style = meta.controller.getStyle(i);
-                    return {
-                        text: labels[i],
-                        fillStyle: style.backgroundColor,
-                        strokeStyle: style.borderColor,
-                        lineWidth: style.borderWidth,
-                        hidden: !chart.getDataVisibility(i),
-                        index: i
-                    }
-                });
-                return [];
-            }
+class tl_nhd_chartjs_diagramms extends Backend
+{
+    public function reloadOnLoad($dc)
+    {
+        if (!$dc->id) {
+            return;
         }
-	},
-	tooltip: {
-		position: 'nearest',
-		yAlign: 'top',
-		xAlign: 'center',
-        titleFont: {
-			size: 10
-		},
-		bodyFont: {
-			size: 11 
-		},
-		callbacks: {
-            label: function(context) {
-                let label = context.label || '';
-                let value = context.raw || '';
-                return value + '%';
-            }
+    
+        $db = Database::getInstance();
+
+        // Datensatz aus der DB abrufen
+        $record = $db->prepare("SELECT chartType, cssID, chartDatasets FROM tl_nhd_chartjs_diagramms WHERE id=?")
+                    ->execute($dc->id)
+                    ->fetchAssoc();
+
+        // Falls `chartType` leer ist, Standardwert setzen
+        if (empty($record['chartType'])) {
+            $db->prepare("UPDATE tl_nhd_chartjs_diagramms SET chartType=? WHERE id=?")
+            ->execute('bar', $dc->id);
         }
-	}
+
+        // Falls `cssID` leer ist, Standardwert setzen
+        if (empty($record['cssID'])) {
+            $db->prepare("UPDATE tl_nhd_chartjs_diagramms SET cssID=? WHERE id=?")
+            ->execute('default', $dc->id);
+        }       
+    }
+
+    public function chartOptionsCallback($value, DataContainer $dc)
+    {
+        if ($value) {
+            return $value;
+        }
+
+        return json_decode($GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartOptions']['default']);
+    }
+
+    public function datasetsCallback($value, DataContainer $dc)
+    {
+        $dataset = '';
+
+        if (!$dc->activeRecord || !$dc->id) {
+            $dataset = !empty($value) ? $value : '';
+        }
+        
+        $db = Database::getInstance();
+        $record = $db->prepare("SELECT chartType, chartDatasets FROM tl_nhd_chartjs_diagramms WHERE id=?")
+                 ->execute($dc->id)
+                 ->fetchAssoc();
+        
+        if (!$record) {
+            return $this->getDefaultDatasets('bar');
+        }
+        
+        if ($record['chartType'] !== $dc->activeRecord->chartType || empty($record['chartDatasets'])) {
+            return $this->getDefaultDatasets($dc->activeRecord->chartType);
+        }
+
+        return $dataset;
+    }
+
+    private function getDefaultDatasets($chartType): string
+    {
+        return $GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default'][$chartType] ?? '';
+    }
+
 }
-");
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default']['bar'] = "
-data: [ // fill with Values same Count into Label
-	6,
-	39.20,
-	1.20,
-	12.90,
-	28.90,
-	11.80
-],
-backgroundColor: [
-	'#ececec',
-	'#2c9094',
-	'#ececec',
-	'#6e9def',
-	'#ececec',
-	'#163263'
-],
-borderWidth: 0,
-hoverOffset: 6,
-borderWidth: 0,
-hoverBorderWidth: 0
-";
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default']['area'] = "{
-    {fill: 'origin'},      // 0: fill to 'origin'
-    {fill: '+2'},          // 1: fill to dataset 3
-    {fill: 1},             // 2: fill to dataset 1
-    {fill: false},         // 3: no fill
-    {fill: '-2'},          // 4: fill to dataset 2
-    {fill: {value: 25}}    // 5: fill to axis value 25
-}";
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default']['bubble'] = "
-data: [{
-    x: 20,
-    y: 30,
-    r: 15
-}, {
-    x: 40,
-    y: 10,
-    r: 10
-}],
-backgroundColor: 'rgb(255, 99, 132)'
-";
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default']['line'] = "
-data: [65, 59, 80, 81, 56, 55, 40],
-fill: false,
-borderColor: 'rgb(75, 192, 192)',
-tension: 0.1
-";
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default']['scatter'] = "
-data: [{
-    x: -10,
-    y: 0
-}, {
-    x: 0,
-    y: 10
-}, {
-    x: 10,
-    y: 5
-}, {
-    x: 0.5,
-    y: 5.5
-}],
-backgroundColor: 'rgb(255, 99, 132)'
-";
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default']['pie'] = "
-data: [
-    300,
-    50,
-    100
-],
-backgroundColor: [
-  'rgb(255, 99, 132)',
-  'rgb(54, 162, 235)',
-  'rgb(255, 205, 86)'
-],
-hoverOffset: 4
-";
-$GLOBALS['TL_LANG']['tl_nhd_chartjs_diagramms']['fields']['chartDatasets']['default']['doughnut'] = "
-data: [
-    300,
-    50,
-    100
-],
-backgroundColor: [
-  'rgb(255, 99, 132)',
-  'rgb(54, 162, 235)',
-  'rgb(255, 205, 86)'
-],
-hoverOffset: 4
-";

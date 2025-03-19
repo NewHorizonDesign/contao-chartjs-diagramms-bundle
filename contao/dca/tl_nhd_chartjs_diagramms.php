@@ -106,7 +106,7 @@ $GLOBALS['TL_DCA']['tl_nhd_chartjs_diagramms'] = [
             'filter'    => true,
             'sorting'   => true,
             'flag'      => 1,
-            'eval'      => ['mandatory' => false, 'maxlength' => 255, 'tl_class' => 'long clr'],
+            'eval'      => ['mandatory' => true, 'maxlength' => 255, 'tl_class' => 'long clr'],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],
         'chartType'    => [

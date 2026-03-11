@@ -27,4 +27,4 @@ $GLOBALS['TL_LANG']['FMD'][ListenChartjsModulesController::TYPE] = ['ChartJS Dia
 /**
  * Content Module
  */
-$GLOBALS['TL_LANG']['tl_module']['fields']['configSelect'] = ["Diagrammauswahl","Wähle hier dein Diagramm aus, welches du anzeigen lassen willst."];
+$GLOBALS['TL_LANG']['tl_module']['fields']['configSelect'] = ["Diagrammauswahl","Wähle hier dein Diagramm aus, welches du anzeigen lassen willst. Unter CHARTJS > Diagramme konfigurieren!"];
